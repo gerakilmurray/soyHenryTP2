@@ -67,10 +67,6 @@ Sistema inteligente de atención al cliente para entidades bancarias que utiliza
 ━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-### Interfaz Web
-
-![Streamlit App](https://via.placeholder.com/800x400/667eea/ffffff?text=Streamlit+Web+Interface)
-
 ## 🏗️ Arquitectura
 
 ```mermaid
