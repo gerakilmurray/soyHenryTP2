@@ -97,7 +97,7 @@ Ver [ARCHITECTURE.md](docs/ARCHITECTURE.md) para más detalles.
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/soyHenryTP2.git
+git clone https://github.com/gerakilmurray/soyHenryTP2.git
 cd soyHenryTP2
 
 # 2. Crear entorno virtual
@@ -353,8 +353,6 @@ Sistema: [LLM directo] → "En BANCO HENRY ofrecemos..."
 4. Push a la rama (`git push origin feature/NuevaFuncionalidad`)
 5. Abre un Pull Request
 
-Ver [CONTRIBUTING.md](CONTRIBUTING.md) para más detalles.
-
 ## 📝 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
@@ -362,7 +360,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 ## 👨‍💻 Autor
 
 **[Tu Nombre]**
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
+- GitHub: [@gerakilmurray](https://github.com/gerakilmurray)
 - LinkedIn: [Tu Perfil](https://linkedin.com/in/tu-perfil)
 - Email: tu.email@ejemplo.com
 
@@ -378,8 +376,8 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 ¿Tienes preguntas o problemas?
 
 - 📖 Lee la [Guía de Usuario](docs/USER_GUIDE.md)
-- 🐛 Reporta bugs en [Issues](https://github.com/tu-usuario/soyHenryTP2/issues)
-- 💬 Únete a las [Discusiones](https://github.com/tu-usuario/soyHenryTP2/discussions)
+- 🐛 Reporta bugs en [Issues](https://github.com/gerakilmurray/soyHenryTP2/issues)
+- 💬 Únete a las [Discusiones](https://github.com/gerakilmurray/soyHenryTP2/discussions)
 
 ---
 
