@@ -89,7 +89,7 @@ Ver [ARCHITECTURE.md](docs/ARCHITECTURE.md) para más detalles.
 
 ### Prerrequisitos
 
-- Python 3.10 o superior
+- Python 3.10
 - pip (incluido con Python)
 - API key de OpenAI
 
