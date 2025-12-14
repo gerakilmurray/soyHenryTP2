@@ -1,0 +1,26 @@
+services:
+  langchain-bank:
+    build: .
+    container_name: langchain-bank-app
+    environment:
+      # Variables para diferentes proveedores de LLM
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4-0125-preview}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - GROQ_MODEL=${GROQ_MODEL:-llama3-8b-8192}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-3-sonnet-20240229}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama2}
+    volumes:
+      - ./solution:/app/solution
+      - ./data:/app/data
+      - ./knowledge_base:/app/knowledge_base
+    stdin_open: true
+    tty: true
+    networks:
+      - langchain-network
+
+networks:
+  langchain-network:
+    driver: bridge
