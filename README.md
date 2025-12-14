@@ -362,7 +362,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 **[Tu Nombre]**
 - GitHub: [@gerakilmurray](https://github.com/gerakilmurray)
 - LinkedIn: [Tu Perfil](https://www.linkedin.com/in/gerardokilmurray/)
-- Email: tu.email@ejemplo.com
+- Email: gerakilmurray@gmail.com
 
 ## 🙏 Agradecimientos
 
