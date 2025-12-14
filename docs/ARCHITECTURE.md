@@ -6,61 +6,50 @@ El Sistema de Atención al Cliente Automatizado es una aplicación basada en Lan
 
 ## 📐 Arquitectura de Componentes
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    INTERFAZ DE USUARIO                  │
-│  ┌──────────────┐              ┌──────────────┐        │
-│  │   CLI App    │              │  Web App     │        │
-│  │  (main.py)   │              │  (app.py)    │        │
-│  └──────┬───────┘              └──────┬───────┘        │
-└─────────┼──────────────────────────────┼───────────────┘
-          │                              │
-          └──────────────┬───────────────┘
-                         │
-          ┌──────────────▼───────────────┐
-          │   CustomerServiceAgent       │
-          │         (agent.py)           │
-          └──────────────┬───────────────┘
-                         │
-          ┌──────────────▼───────────────┐
-          │      QueryRouter             │
-          │       (router.py)            │
-          │                              │
-          │  ┌──────────────────────┐   │
-          │  │  Clasificador LLM    │   │
-          │  │  + Reglas heurísticas│   │
-          │  └──────────────────────┘   │
-          └──────┬──────┬────────┬──────┘
-                 │      │        │
-        ┌────────▼──┐ ┌─▼─────┐ ┌▼──────────┐
-        │  Balance  │ │Knowledge│ │  General  │
-        │  Handler  │ │ Handler │ │  Handler  │
-        └─────┬─────┘ └────┬────┘ └────┬──────┘
-              │            │            │
-     ┌────────▼─────┐ ┌───▼─────────┐ ┌▼──────────┐
-     │CSVQueryMgr   │ │ KnowledgeBase│ │ LLM       │
-     │(csv_query.py)│ │Manager       │ │(GPT-4)    │
-     └──────┬───────┘ │(knowledge_   │ └───────────┘
-            │         │ base.py)     │
-     ┌──────▼──────┐  └──────┬───────┘
-     │  saldos.csv │         │
-     └─────────────┘  ┌──────▼────────┐
-                      │ FAISS Vector  │
-                      │   Database    │
-                      │ (embeddings)  │
-                      └───────────────┘
+```mermaid
+flowchart TD
+    subgraph UI["INTERFAZ DE USUARIO"]
+        CLI["CLI App<br/>(main.py)"]
+        WEB["Web App<br/>(app.py)"]
+    end
+    
+    CLI --> AGENT
+    WEB --> AGENT
+    
+    AGENT["CustomerServiceAgent<br/>(agent.py)"]
+    AGENT --> ROUTER
+    
+    subgraph ROUTER["QueryRouter (router.py)"]
+        CLASSIFIER["Clasificador LLM<br/>+ Reglas heurísticas"]
+    end
+    
+    ROUTER --> BALANCE["Balance Handler"]
+    ROUTER --> KNOWLEDGE["Knowledge Handler"]
+    ROUTER --> GENERAL["General Handler"]
+    
+    BALANCE --> CSV_MGR["CSVQueryMgr<br/>(csv_query.py)"]
+    CSV_MGR --> CSV_DATA[("saldos.csv")]
+    
+    KNOWLEDGE --> KB_MGR["KnowledgeBase Manager<br/>(knowledge_base.py)"]
+    KB_MGR --> FAISS[("FAISS Vector Database<br/>(embeddings)")]
+    
+    GENERAL --> LLM["LLM<br/>(GPT-4)"]
 ```
 
 ## 🔄 Flujo de Procesamiento
 
 ### 1. Recepción de Consulta
-```
-Usuario → Interfaz (CLI/Web) → CustomerServiceAgent
+```mermaid
+flowchart LR
+    Usuario --> Interfaz[Interfaz CLI/Web]
+    Interfaz --> Agent[CustomerServiceAgent]
 ```
 
 ### 2. Clasificación
-```
-CustomerServiceAgent → QueryRouter → Clasificación (balance/knowledge/general)
+```mermaid
+flowchart LR
+    Agent[CustomerServiceAgent] --> Router[QueryRouter]
+    Router --> Clasificacion[Clasificación:<br/>balance/knowledge/general]
 ```
 
 **Proceso de Clasificación:**
@@ -74,38 +63,34 @@ CustomerServiceAgent → QueryRouter → Clasificación (balance/knowledge/gener
 ### 3. Enrutamiento y Procesamiento
 
 #### A. Consulta de Balance (balance)
-```
-QueryRouter → CSVQueryManager
-    ↓
-1. Extracción de cédula (regex + LLM)
-2. Búsqueda en DataFrame
-3. Formateo de respuesta
-    ↓
-Usuario ← Respuesta formateada
+```mermaid
+flowchart TD
+    QR[QueryRouter] --> CSV[CSVQueryManager]
+    CSV --> E1[1. Extracción de cédula<br/>regex + LLM]
+    E1 --> E2[2. Búsqueda en DataFrame]
+    E2 --> E3[3. Formateo de respuesta]
+    E3 --> Usuario[Usuario ← Respuesta formateada]
 ```
 
 #### B. Consulta de Conocimientos (knowledge)
-```
-QueryRouter → KnowledgeBaseManager
-    ↓
-1. Generación de embeddings (query)
-2. Búsqueda en FAISS (similarity search)
-3. Recuperación de top-k documentos
-4. Chain RetrievalQA con contexto
-    ↓
-LLM genera respuesta contextualizada
-    ↓
-Usuario ← Respuesta + fuentes
+```mermaid
+flowchart TD
+    QR[QueryRouter] --> KB[KnowledgeBaseManager]
+    KB --> K1[1. Generación de embeddings]
+    K1 --> K2[2. Búsqueda en FAISS<br/>similarity search]
+    K2 --> K3[3. Recuperación de<br/>top-k documentos]
+    K3 --> K4[4. Chain RetrievalQA<br/>con contexto]
+    K4 --> LLM[LLM genera respuesta<br/>contextualizada]
+    LLM --> Usuario[Usuario ← Respuesta + fuentes]
 ```
 
 #### C. Consulta General (general)
-```
-QueryRouter → Direct LLM
-    ↓
-1. Prompt contextualizado como asistente bancario
-2. Generación de respuesta
-    ↓
-Usuario ← Respuesta
+```mermaid
+flowchart TD
+    QR[QueryRouter] --> LLM[Direct LLM]
+    LLM --> G1[1. Prompt contextualizado<br/>como asistente bancario]
+    G1 --> G2[2. Generación de respuesta]
+    G2 --> Usuario[Usuario ← Respuesta]
 ```
 
 ## 🧩 Componentes Principales
@@ -164,12 +149,17 @@ Usuario ← Respuesta
 - `get_retriever()`: Retriever para chains
 
 **Pipeline RAG:**
-```
-Documentos → Chunking → Embeddings → FAISS Index
-                                           ↓
-Query → Embedding → Similarity Search → Top-K Docs
-                                           ↓
-                                    Contexto para LLM
+```mermaid
+flowchart TD
+    D[Documentos] --> C[Chunking]
+    C --> E[Embeddings]
+    E --> F[FAISS Index]
+    
+    Q[Query] --> QE[Embedding]
+    QE --> SS[Similarity Search]
+    F --> SS
+    SS --> TK[Top-K Docs]
+    TK --> CTX[Contexto para LLM]
 ```
 
 **Modelo de Embeddings:**
@@ -298,16 +288,25 @@ logger.critical("Error fatal")
 
 ## 🧪 Testing
 
-### Pirámide de Testing
-```
-       ╱╲
-      ╱  ╲      E2E Tests
-     ╱────╲     (test_integration.py)
-    ╱      ╲    
-   ╱────────╲   Integration Tests
-  ╱          ╲  (test_router.py, etc.)
- ╱────────────╲
-╱ Unit Tests   ╲ (test_csv_query.py)
+### Jerarquía de Testing
+```mermaid
+flowchart TB
+    subgraph E2E["E2E Tests"]
+        E[test_integration.py]
+    end
+    subgraph INT["Integration Tests"]
+        I[test_router.py, etc.]
+    end
+    subgraph UNIT["Unit Tests"]
+        U[test_csv_query.py]
+    end
+    
+    E2E --> INT
+    INT --> UNIT
+    
+    style E2E fill:#ff9999
+    style INT fill:#ffcc99
+    style UNIT fill:#99ccff
 ```
 
 ### Cobertura de Tests
@@ -334,21 +333,25 @@ async def process_batch(queries: List[str]):
 
 ## 🔄 Diagrama de Secuencia
 
-```
-Usuario          CLI/Web         Agent           Router         Handlers
-  │                │               │               │               │
-  ├──query─────────>│               │               │               │
-  │                ├──process───────>│               │               │
-  │                │               ├──classify─────>│               │
-  │                │               │               ├──[rules]      │
-  │                │               │               ├──[LLM]        │
-  │                │               │<──QueryType───┤               │
-  │                │               ├──route────────────────────────>│
-  │                │               │               │               ├─[CSV/KB/LLM]
-  │                │               │<──response─────────────────────┤
-  │                │<──result──────┤               │               │
-  │<──formatted────┤               │               │               │
-  │                │               │               │               │
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant CLI as CLI/Web
+    participant A as Agent
+    participant R as Router
+    participant H as Handlers
+    
+    U->>CLI: query
+    CLI->>A: process
+    A->>R: classify
+    R->>R: [rules]
+    R->>R: [LLM]
+    R-->>A: QueryType
+    A->>H: route
+    H->>H: [CSV/KB/LLM]
+    H-->>A: response
+    A-->>CLI: result
+    CLI-->>U: formatted
 ```
 
 ## 🎯 Decisiones de Diseño

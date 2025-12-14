@@ -49,43 +49,39 @@ Este proyecto implementa un sistema completo de atención al cliente automatizad
 
 ### Componentes Principales
 
-```
-┌─────────────────────────────────────────┐
-│      Interfaces de Usuario              │
-│  ┌──────────┐      ┌──────────┐        │
-│  │   CLI    │      │   Web    │        │
-│  │ main.py  │      │  app.py  │        │
-│  └────┬─────┘      └────┬─────┘        │
-└───────┼──────────────────┼──────────────┘
-        │                  │
-        └────────┬─────────┘
-                 │
-┌────────────────▼────────────────┐
-│   CustomerServiceAgent          │
-│   (agent.py)                    │
-│                                 │
-│   - Orquestación principal      │
-│   - Manejo de errores           │
-│   - Tracking de estadísticas    │
-└────────────────┬────────────────┘
-                 │
-┌────────────────▼────────────────┐
-│   QueryRouter (router.py)       │
-│                                 │
-│   - Clasificación por reglas    │
-│   - Clasificación con LLM       │
-│   - Extracción de entidades     │
-└─────┬──────┬──────┬─────────────┘
-      │      │      │
-┌─────▼──┐ ┌─▼────┐ ┌▼─────────┐
-│Balance │ │Know  │ │ General  │
-│Handler │ │ledge │ │ Handler  │
-└────┬───┘ └──┬───┘ └────┬─────┘
-     │        │          │
-┌────▼───┐ ┌──▼─────┐ ┌─▼──┐
-│  CSV   │ │ FAISS  │ │LLM │
-│Pandas  │ │  RAG   │ │GPT4│
-└────────┘ └────────┘ └────┘
+```mermaid
+flowchart TD
+    subgraph UI["Interfaces de Usuario"]
+        CLI["CLI<br/>main.py"]
+        WEB["Web<br/>app.py"]
+    end
+    
+    CLI --> AGENT
+    WEB --> AGENT
+    
+    subgraph AGENT["CustomerServiceAgent (agent.py)"]
+        direction TB
+        A1["- Orquestación principal"]
+        A2["- Manejo de errores"]
+        A3["- Tracking de estadísticas"]
+    end
+    
+    AGENT --> ROUTER
+    
+    subgraph ROUTER["QueryRouter (router.py)"]
+        direction TB
+        R1["- Clasificación por reglas"]
+        R2["- Clasificación con LLM"]
+        R3["- Extracción de entidades"]
+    end
+    
+    ROUTER --> BH["Balance<br/>Handler"]
+    ROUTER --> KH["Knowledge<br/>Handler"]
+    ROUTER --> GH["General<br/>Handler"]
+    
+    BH --> CSV["CSV<br/>Pandas"]
+    KH --> FAISS["FAISS<br/>RAG"]
+    GH --> LLM["LLM<br/>GPT4"]
 ```
 
 ### Decisiones de Diseño
@@ -150,28 +146,24 @@ result = self.df[self.df["ID_Cedula"] == cedula]
 
 **Pipeline Completo:**
 
-```
-Documentos (.txt)
-    ↓
-Chunking (LangChain loaders)
-    ↓
-Embeddings (sentence-transformers/all-MiniLM-L6-v2)
-    ↓
-Indexación FAISS (384 dimensiones)
-    ↓
-[Almacenamiento local]
+```mermaid
+flowchart TD
+    subgraph Indexación
+        D[Documentos .txt] --> C[Chunking<br/>LangChain loaders]
+        C --> E[Embeddings<br/>sentence-transformers/all-MiniLM-L6-v2]
+        E --> I[Indexación FAISS<br/>384 dimensiones]
+        I --> S[Almacenamiento local]
+    end
     
-Query del usuario
-    ↓
-Embedding del query
-    ↓
-Similarity Search (FAISS)
-    ↓
-Top-K documentos relevantes
-    ↓
-RetrievalQA Chain
-    ↓
-Respuesta contextualizada (GPT-4)
+    subgraph Consulta
+        Q[Query del usuario] --> QE[Embedding del query]
+        QE --> SS[Similarity Search<br/>FAISS]
+        SS --> TK[Top-K documentos relevantes]
+        TK --> RC[RetrievalQA Chain]
+        RC --> R[Respuesta contextualizada<br/>GPT-4]
+    end
+    
+    S -.-> SS
 ```
 
 **Características Implementadas:**
